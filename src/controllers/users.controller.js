@@ -5,13 +5,13 @@ import { v4 as uuidV4 } from 'uuid';
 const userUpSchema = joi.object({
     name: joi.string().min(3).required().trim(),
     email: joi.required().email().string().trim(),
-    password: joi.required(),
-    passwordConfirm: joi.required()
+    password: joi.required().string(),
+    passwordConfirm: joi.required().string()
 });
 
 const userInSchema = joi.object({
     email: joi.required().email().string().trim(),
-    password: joi.required()
+    password: joi.required().string()
 });
 
 export async function postSingUp(req, res) {
@@ -19,7 +19,7 @@ export async function postSingUp(req, res) {
     const user = req.body;
 
     try {
-        const userExists = await userCollection.findOne({ email: user.email });
+        const userExists = await collectionUsers.findOne({ email: user.email });
 
         if (userExists) {
             res.status(409).send({ message: "Esse e-mail já está cadastrado!" });
@@ -34,14 +34,14 @@ export async function postSingUp(req, res) {
             return;
         };
 
-        if(user.password !== user.passwordConfirm){
-            res.status(400).send({message: "As senhas digitadas são diferentes!"});
+        if (user.password !== user.passwordConfirm) {
+            res.status(400).send({ message: "As senhas digitadas são diferentes!" });
             return;
         };
 
         const hashPassword = bcrypt.hashSync(user.password, 10);
 
-        await userCollection.insertOne({ ...user, password: hashPassword });
+        await collectionUsers.insertOne({ ...user, password: hashPassword });
         res.status(201).send({ message: "Cadastro realizado com sucesso!" });
     } catch (error) {
         res.status(500).send(error);
@@ -53,11 +53,13 @@ export async function postSingIn(req, res) {
 
     const { email, password } = req.body;
 
-    try {
-        const userExists = await userCollection.findOne({ email });
+    const token = uuidV4();
 
-        if(!userExists){
-            res.status(401).send({message: "O e-mail não está cadastrado!"});
+    try {
+        const userExists = await collectionUsers.findOne({ email });
+
+        if (!userExists) {
+            res.status(401).send({ message: "O e-mail não está cadastrado!" });
             return;
         };
 
@@ -71,13 +73,19 @@ export async function postSingIn(req, res) {
 
         const passwordOk = bcrypt.compareSync(password, userExists.password);
 
-        if(!passwordOk){
-            res.status(401).send({message: "A senha está incorreta!"});
+        if (!passwordOk) {
+            res.status(401).send({ message: "A senha está incorreta!" });
+            return;
         };
 
-        res.send({message: `Olá ${userExists.name}, seja bem-vinde!`});
+        await collectionSessions.insertOne({
+            token,
+            userId: userExists._id
+        });
+
+        res.send({ token });
     } catch (error) {
         res.status(500).send(error);
-    }
+    };
 
 };
