@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import joi from "joi";
 import extractsRouters from "./routers/extract.routes.js"
 import usersRouters from "./routers/users.routes.js"
 

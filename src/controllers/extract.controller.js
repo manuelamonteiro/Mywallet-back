@@ -1,12 +1,5 @@
-import joi from "joi";
 import dayjs from "dayjs";
 import { collectionExtracts, collectionSessions, collectionUsers } from "../database/db.js";
-
-const extractSchema = joi.object({
-    value: joi.number().precision(2).required(),
-    type: joi.required().valid("desposit", "withdrawl"),
-    description: joi.string().min(3).required()
-})
 
 export async function postExtract(req, res) {
 
@@ -36,14 +29,6 @@ export async function postExtract(req, res) {
 
         delete user.password;
         delete user.passwordConfirm;
-
-        const validationStatus = extractSchema.validate(req.body, { abortEarly: false });
-
-        if (validationStatus.error) {
-            const error = validationStatus.error.details.map((detail) => detail.message);
-            res.status(422).send(error);
-            return;
-        };
 
         const extract = {
             userId: session.userId,
