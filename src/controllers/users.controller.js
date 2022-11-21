@@ -1,17 +1,18 @@
 import joi from "joi";
 import bcrypt from "bcrypt";
 import { v4 as uuidV4 } from 'uuid';
+import { collectionSessions, collectionUsers } from "../database/db.js";
 
 const userUpSchema = joi.object({
     name: joi.string().min(3).required().trim(),
-    email: joi.required().email().string().trim(),
-    password: joi.required().string(),
-    passwordConfirm: joi.required().string()
+    email: joi.string().email().required().trim(),
+    password: joi.string().required(),
+    passwordConfirm: joi.string().required()
 });
 
 const userInSchema = joi.object({
-    email: joi.required().email().string().trim(),
-    password: joi.required().string()
+    email: joi.string().email().required().trim(),
+    password: joi.required()
 });
 
 export async function postSingUp(req, res) {
@@ -44,6 +45,7 @@ export async function postSingUp(req, res) {
         await collectionUsers.insertOne({ ...user, password: hashPassword });
         res.status(201).send({ message: "Cadastro realizado com sucesso!" });
     } catch (error) {
+        console.log(error);
         res.status(500).send(error);
     };
 

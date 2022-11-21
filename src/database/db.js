@@ -13,6 +13,6 @@ try {
 }
 
 const db = mongoClient.db("mywallet-api");
-//export const collectionUsers = db.collection("users");
-//export const collectionExtracts = db.collection("extract");
-//export const collectionSessions = db.collection("sessions");
+export const collectionUsers = db.collection("users");
+export const collectionExtracts = db.collection("extract");
+export const collectionSessions = db.collection("sessions");
