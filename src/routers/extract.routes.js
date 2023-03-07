@@ -5,7 +5,6 @@ import { extractValidate } from "../middlewares/extractValidate.middleware.js";
 const router = Router();
 
 router.post("/extract", extractValidate, postExtract);
-
 router.get("/history", getHistory);
 
 export default router;
